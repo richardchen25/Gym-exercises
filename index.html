@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GYM 101">
+<meta name="theme-color" content="#12203A">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>GYM 101 — Strength &amp; Conditioning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #12203A; --paper: #ECEDEF; --card: #FFFFFF; --gold: #BF9B30;
+    --red: #A62639; --slate: #5B6B73; --ink: #26262A; --hairline: #D6D7DA;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--paper); color: var(--ink);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+    touch-action: manipulation;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .display { font-family: 'Bebas Neue', 'Arial Narrow', sans-serif; letter-spacing: .6px; text-transform: uppercase; }
+
+  header { background: var(--navy); padding: calc(env(safe-area-inset-top) + 18px) 20px 16px; }
+  .head-inner { max-width: 500px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+  .badge { width: 44px; height: 44px; border-radius: 50%; background: var(--gold); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .badge svg { width: 24px; height: 24px; }
+  h1 { color: #fff; font-size: 27px; margin: 0; line-height: 1.05; font-weight: 400; }
+  .subtitle { color: #fff; opacity: .85; font-size: 13px; margin-top: 2px; }
+  .meta { color: var(--gold); font-size: 10.5px; letter-spacing: .5px; margin-top: 6px; }
+  .progress-wrap { max-width: 500px; margin: 12px auto 0; }
+  .progress-label { color: #fff; opacity: .75; font-size: 10px; letter-spacing: .8px; margin-bottom: 5px; }
+  .progress-track { height: 4px; background: rgba(255,255,255,.18); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; transition: width .35s ease; }
+
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--paper);
+    padding: 10px 16px 8px;
+  }
+  .nav-inner { max-width: 500px; margin: 0 auto; display: flex; gap: 6px; }
+  .nav-btn {
+    flex: 1; padding: 10px 4px;
+    border-radius: 9px; border: 1px solid var(--hairline);
+    background: var(--card); color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .5px; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .nav-btn[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .nav-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  main { max-width: 500px; margin: 0 auto; padding: 0 16px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .tabs { display: flex; gap: 6px; padding: 4px 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1 0 auto; min-width: 52px; padding: 9px 10px;
+    border-radius: 9px; border: 1px solid var(--hairline);
+    background: var(--card); color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: background .15s, color .15s;
+  }
+  .tab[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .tab .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .tab .dot.work { background: var(--gold); }
+  .tab .dot.rest { background: var(--slate); }
+  .tab .tick { font-size: 9px; color: var(--gold); line-height: 1; }
+  .tab:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  .card { background: var(--card); border: 1px solid var(--hairline); border-radius: 12px; padding: 18px; margin-top: 8px; }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .session-label { color: var(--gold); font-size: 11px; letter-spacing: .5px; }
+  .session-title { color: var(--navy); font-size: 24px; margin-top: 2px; }
+  .stamp {
+    border: 2px solid var(--red); color: var(--red);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: .5px;
+    padding: 4px 8px; border-radius: 6px; transform: rotate(4deg);
+    flex-shrink: 0; animation: stamp-in .25s ease;
+  }
+  @keyframes stamp-in { from { transform: rotate(4deg) scale(1.6); opacity: 0; } to { transform: rotate(4deg) scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .stamp { animation: none; } .progress-fill { transition: none; } .spin { animation: none !important; } }
+
+  .ex-list { margin-top: 10px; }
+  .ex-row {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    min-height: 52px; padding: 8px 4px;
+    border: 0; border-bottom: 1px solid var(--hairline);
+    background: transparent; font-family: inherit; text-align: left; cursor: pointer;
+  }
+  .ex-row:focus-visible { outline: 2px solid var(--navy); outline-offset: -2px; border-radius: 6px; }
+  .ex-check {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid var(--hairline); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700;
+    transition: background .15s, border-color .15s;
+  }
+  .ex-row[aria-pressed="true"] .ex-check { background: var(--red); border-color: var(--red); }
+  .ex-name { flex: 1; font-size: 14px; color: var(--navy); line-height: 1.3; }
+  .ex-row[aria-pressed="true"] .ex-name { color: var(--ink); opacity: .45; text-decoration: line-through; }
+  .ex-detail { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; color: var(--ink); opacity: .7; text-align: right; flex-shrink: 0; }
+  .ex-detail small { display: block; font-size: 9.5px; opacity: .8; }
+
+  .cardio { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--hairline); display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; color: var(--navy); }
+  .flame { color: var(--gold); }
+
+  .rest-card { text-align: center; padding: 26px 10px; }
+  .rest-label { color: var(--slate); font-size: 11px; letter-spacing: .5px; }
+  .rest-title { color: var(--navy); font-size: 26px; margin-top: 6px; }
+  .rest-copy { font-size: 13.5px; opacity: .75; margin: 8px auto 0; max-width: 300px; line-height: 1.45; }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    padding: 9px 14px; border-radius: 999px;
+    border: 1px solid var(--hairline); background: var(--card); color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 600; }
+  .chip:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  .region-title { color: var(--navy); font-size: 20px; }
+  .lib-row { display: flex; align-items: baseline; gap: 10px; padding: 10px 2px; border-bottom: 1px solid var(--hairline); }
+  .lib-name { flex: 1; font-size: 13.5px; color: var(--navy); line-height: 1.3; }
+  .lib-sets { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: var(--ink); opacity: .8; flex-shrink: 0; }
+  .lib-note { font-size: 11.5px; opacity: .6; margin-top: 10px; line-height: 1.4; }
+
+  .field-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: .8px; color: var(--ink); opacity: .65; margin: 16px 0 8px; }
+  .field-label:first-child { margin-top: 0; }
+  textarea, input[type="password"] {
+    width: 100%; padding: 11px 12px;
+    border: 1px solid var(--hairline); border-radius: 9px;
+    background: var(--card); color: var(--ink);
+    font-family: 'Inter', sans-serif; font-size: 14px; resize: vertical;
+  }
+  textarea:focus, input:focus { outline: 2px solid var(--navy); outline-offset: 1px; }
+  .btn-primary {
+    display: block; width: 100%; margin-top: 18px;
+    background: var(--navy); color: #fff; border: 0; border-radius: 10px;
+    padding: 14px; font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12.5px; letter-spacing: 1px; cursor: pointer;
+  }
+  .btn-primary:disabled { opacity: .55; cursor: default; }
+  .btn-apply {
+    display: block; width: 100%; margin-top: 14px;
+    background: var(--red); color: #fff; border: 0; border-radius: 10px;
+    padding: 13px; font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px; letter-spacing: 1px; cursor: pointer;
+  }
+  .btn-primary:focus-visible, .btn-apply:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .coach-status { margin-top: 14px; font-size: 13px; line-height: 1.45; display: flex; align-items: center; gap: 10px; }
+  .coach-status.error { color: var(--red); }
+  .spin {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--hairline); border-top-color: var(--gold);
+    animation: spin .8s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gen-day-title { color: var(--navy); font-size: 19px; }
+  .gen-meta { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; color: var(--gold); letter-spacing: .5px; }
+
+  details.settings { margin-top: 16px; }
+  details.settings summary {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: 1px; color: var(--ink); opacity: .6;
+    cursor: pointer; list-style: none; padding: 6px 0;
+  }
+  details.settings summary::-webkit-details-marker { display: none; }
+  .key-note { font-size: 11.5px; opacity: .65; line-height: 1.45; margin: 8px 0; }
+
+  .reset-btn, .restore-btn {
+    display: block; margin: 18px auto 0;
+    background: transparent; border: 1px solid var(--hairline); color: var(--slate);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: 1px; padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  }
+  .reset-btn:focus-visible, .restore-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .program-name { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .8px; color: var(--slate); text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#12203A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>
+    </div>
+    <div>
+      <h1 class="display">GYM 101</h1>
+      <div class="subtitle">Strength &amp; Conditioning</div>
+      <div class="meta mono">CAMPUS REC CENTER · 5X/WEEK</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label mono" id="progressLabel">0/5 SESSIONS THIS WEEK</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</header>
+
+<nav class="nav"><div class="nav-inner" role="tablist" aria-label="App sections">
+  <button class="nav-btn" data-view="week" aria-selected="true">WEEK</button>
+  <button class="nav-btn" data-view="library" aria-selected="false">LIBRARY</button>
+  <button class="nav-btn" data-view="coach" aria-selected="false">AI COACH</button>
+</div></nav>
+
+<main>
+  <section class="view active" id="view-week">
+    <div class="tabs" role="tablist" aria-label="Days of the week" id="tabs"></div>
+    <div id="dayCard"></div>
+    <div class="program-name" id="programName"></div>
+    <button class="restore-btn" id="restoreBtn" style="display:none">RESTORE DEFAULT PROGRAM</button>
+    <button class="reset-btn" id="resetBtn">RESET WEEK</button>
+  </section>
+
+  <section class="view" id="view-library">
+    <div class="field-label">SHOWING RECOMMENDATIONS FOR</div>
+    <div class="chips" id="levelChips" role="group" aria-label="Level"></div>
+    <div id="libraryList"></div>
+    <p class="lib-note">Sets × reps shown are the recommended working volume per exercise at your level. Pick 1–3 exercises per region per session — full weekly structures live in the WEEK tab or the repo's programs folder.</p>
+  </section>
+
+  <section class="view" id="view-coach">
+    <div class="field-label">GOAL</div>
+    <div class="chips" id="goalChips" role="group" aria-label="Goal"></div>
+    <div class="field-label">LEVEL</div>
+    <div class="chips" id="coachLevelChips" role="group" aria-label="Level"></div>
+    <div class="field-label">DAYS PER WEEK</div>
+    <div class="chips" id="dayChips" role="group" aria-label="Days per week"></div>
+    <div class="field-label">EQUIPMENT</div>
+    <div class="chips" id="equipChips" role="group" aria-label="Equipment"></div>
+    <div class="field-label">ANYTHING ELSE? (OPTIONAL)</div>
+    <textarea id="coachNotes" rows="2" placeholder="e.g. bad shoulder, want bigger arms, only 45 min per session"></textarea>
+    <button class="btn-primary" id="generateBtn">GENERATE ROUTINE ⚡</button>
+    <div id="coachStatus"></div>
+    <div id="coachResult"></div>
+    <details class="settings">
+      <summary>API KEY (ONLY NEEDED OUTSIDE CLAUDE) +</summary>
+      <p class="key-note">Inside Claude this works automatically. On your phone or GitHub Pages, paste an Anthropic API key from console.anthropic.com — it's stored only on this device and API usage is billed to your key.</p>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+    </details>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var DEFAULT_WEEK = [
+    { key: 'MON', label: 'Mon', type: 'workout', session: 'SESSION 01', title: 'Upper Body A', cardio: '15 min · easy-moderate pace', exercises: [
+      { id: 'm1', name: 'Chest Press Machine', sets: 4, reps: '10-12', rest: '90s' },
+      { id: 'm2', name: 'Lat Pulldown Machine', sets: 4, reps: '10-12', rest: '90s' },
+      { id: 'm3', name: 'Shoulder Press Machine', sets: 3, reps: '10-12', rest: '90s' },
+      { id: 'm4', name: 'Seated Row Machine', sets: 3, reps: '10-12', rest: '90s' },
+      { id: 'm5', name: 'Cable Tricep Pushdown', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 'm6', name: 'Machine/Cable Bicep Curl', sets: 3, reps: '12-15', rest: '60s' }
+    ]},
+    { key: 'TUE', label: 'Tue', type: 'workout', session: 'SESSION 02', title: 'Lower Body A', cardio: '15 min · easy-moderate pace', exercises: [
+      { id: 't1', name: 'Leg Press', sets: 3, reps: '10-12', rest: '90s' },
+      { id: 't2', name: 'Leg Extension', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 't3', name: 'Seated Leg Curl', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 't4', name: 'Hip Abduction Machine', sets: 2, reps: '12-15', rest: '60s' },
+      { id: 't5', name: 'Calf Raise Machine', sets: 3, reps: '15-20', rest: '45s' }
+    ]},
+    { key: 'WED', label: 'Wed', type: 'rest' },
+    { key: 'THU', label: 'Thu', type: 'workout', session: 'SESSION 03', title: 'Upper Body B', cardio: '15 min · easy-moderate pace', exercises: [
+      { id: 'h1', name: 'Pec Deck / Chest Fly Machine', sets: 3, reps: '10-12', rest: '90s' },
+      { id: 'h2', name: 'Assisted Pull-Up (or wide Lat Pulldown)', sets: 4, reps: '10-12', rest: '90s' },
+      { id: 'h3', name: 'Machine/Cable Lateral Raise', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 'h4', name: 'Chest-Supported Row Machine', sets: 4, reps: '10-12', rest: '90s' },
+      { id: 'h5', name: 'Rope Tricep Pushdown', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 'h6', name: 'Preacher Curl Machine', sets: 3, reps: '12-15', rest: '60s' }
+    ]},
+    { key: 'FRI', label: 'Fri', type: 'workout', session: 'SESSION 04', title: 'Lower Body B', cardio: '15 min · easy-moderate pace', exercises: [
+      { id: 'f1', name: 'Hack Squat Machine (or Smith Machine)', sets: 3, reps: '10-12', rest: '90s' },
+      { id: 'f2', name: 'Glute Kickback Machine', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 'f3', name: 'Hip Adduction Machine', sets: 2, reps: '12-15', rest: '60s' },
+      { id: 'f4', name: 'Lying Leg Curl', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 'f5', name: 'Seated Calf Raise', sets: 3, reps: '15-20', rest: '45s' }
+    ]},
+    { key: 'SAT', label: 'Sat', type: 'workout', session: 'SESSION 05', title: 'Arms & Core', cardio: '15 min · easy-moderate pace', exercises: [
+      { id: 's1', name: 'Standing Cable Curl', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 's2', name: 'Overhead Cable Tricep Extension', sets: 3, reps: '12-15', rest: '60s' },
+      { id: 's3', name: 'Cable Crunch', sets: 3, reps: '15', rest: '60s' },
+      { id: 's4', name: 'Rotary Torso Machine', sets: 2, reps: '12-15/side', rest: '60s' }
+    ]},
+    { key: 'SUN', label: 'Sun', type: 'rest' }
+  ];
+
+  // [name, beginner, intermediate, advanced] — null means not recommended at that level
+  var LIBRARY = [
+    { region: 'Chest', items: [
+      ['Chest Press Machine', '4×10-12', '3×10-12', '3×12-15'],
+      ['Pec Deck / Chest Fly Machine', '3×10-12', '3×12-15', '3×12-15'],
+      ['Barbell Bench Press', null, '4×6-8', '4×5-8'],
+      ['Incline Dumbbell Press', null, '3×8-10', '3×8-12'],
+      ['Cable Fly', null, '3×12-15', '3×12-15']
+    ]},
+    { region: 'Back', items: [
+      ['Lat Pulldown', '4×10-12', '3×10-12', '4×10-12'],
+      ['Seated Cable Row', '3×10-12', '3×10-12', '3×10-12'],
+      ['Assisted Pull-Up', '4×10-12', null, null],
+      ['Chest-Supported Row', '4×10-12', '3×10-12', '3×10-12'],
+      ['Barbell Row', null, '4×6-8', '4×6-8'],
+      ['Pull-Up (bodyweight/weighted)', null, '4×6-10', '4×5-8'],
+      ['Face Pull', null, '3×15-20', '3×15-20']
+    ]},
+    { region: 'Shoulders', items: [
+      ['Shoulder Press Machine', '3×10-12', '3×10-12', '3×10-12'],
+      ['Machine/Cable Lateral Raise', '3×12-15', '3×12-15', '4×12-15'],
+      ['Dumbbell Lateral Raise', null, '3×12-15', '4×15-20'],
+      ['Seated Dumbbell Shoulder Press', null, '3×8-10', '3×8-12'],
+      ['Overhead Press (barbell)', null, '4×6-8', '3×6-8'],
+      ['Rear Delt Fly', null, '3×15-20', '3×15-20']
+    ]},
+    { region: 'Arms', items: [
+      ['Cable Tricep Pushdown', '3×12-15', '3×10-12', '4×12-15'],
+      ['Overhead Cable Tricep Extension', '3×12-15', '3×10-12', '3×10-12'],
+      ['Machine/Cable Bicep Curl', '3×12-15', null, null],
+      ['Preacher Curl Machine', '3×12-15', '3×10-12', '3×10-12'],
+      ['Dumbbell/EZ-Bar Curl', null, '3×10-12', '3×8-10'],
+      ['Hammer Curl', null, '3×10-12', '3×10-12'],
+      ['Skull Crusher', null, '3×10-12', '3×8-12']
+    ]},
+    { region: 'Legs', items: [
+      ['Leg Press', '3×10-12', '3×10-12', '3×10-12'],
+      ['Leg Extension', '3×12-15', '3×12-15', '3×12-15'],
+      ['Seated/Lying Leg Curl', '3×12-15', '3×12-15', '3×10-15'],
+      ['Hack Squat', '3×10-12', '3×8-10', '4×6-8'],
+      ['Calf Raise (standing/seated)', '3×15-20', '4×12-15', '4×10-20'],
+      ['Barbell Back Squat', null, '4×6-8', '4×5-6'],
+      ['Romanian Deadlift', null, '3×8-10', '3×8-10'],
+      ['Conventional Deadlift', null, '3×5', '3×4-5'],
+      ['Walking Lunge / Split Squat', null, '3×10/leg', '3×8-10/leg'],
+      ['Hip Thrust', null, '3×8-12', '3×8-10']
+    ]},
+    { region: 'Core', items: [
+      ['Cable Crunch', '3×15', '3×12-15', '3×10-15'],
+      ['Rotary Torso Machine', '2×12-15/side', null, null],
+      ['Plank', '3×20-30s', '3×45-60s', '3×60s+'],
+      ['Hanging Knee/Leg Raise', null, '3×10-15', '3×12-15'],
+      ['Ab Wheel Rollout', null, '3×8-12', '3×10-15']
+    ]}
+  ];
+
+  var LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
+  var GOALS = ['Build muscle', 'Strength', 'General fitness', 'Fat loss'];
+  var DAY_OPTIONS = [2, 3, 4, 5, 6];
+  var EQUIPMENT = ['Full gym', 'Dumbbells only', 'Bodyweight'];
+  var DAY_SLOTS = { 2: [0, 3], 3: [0, 2, 4], 4: [0, 1, 3, 4], 5: [0, 1, 3, 4, 5], 6: [0, 1, 2, 3, 4, 5] };
+  var WEEK_META = [['MON','Mon'],['TUE','Tue'],['WED','Wed'],['THU','Thu'],['FRI','Fri'],['SAT','Sat'],['SUN','Sun']];
+
+  var STORAGE_KEY = 'gym101-v2';
+  var memoryStore = null;
+
+  function mondayOf(d) {
+    var copy = new Date(d);
+    copy.setDate(copy.getDate() - ((copy.getDay() + 6) % 7));
+    return copy.toISOString().slice(0, 10);
+  }
+
+  function loadState() {
+    var raw = null;
+    try { raw = window.localStorage.getItem(STORAGE_KEY); } catch (e) { raw = memoryStore; }
+    var s = null;
+    if (raw) { try { s = JSON.parse(raw); } catch (e) { s = null; } }
+    if (!s) s = { week: mondayOf(new Date()), checked: {}, program: null, apiKey: '' };
+    if (s.week !== mondayOf(new Date())) { s.week = mondayOf(new Date()); s.checked = {}; }
+    return s;
+  }
+
+  function saveState() {
+    var raw = JSON.stringify(state);
+    try { window.localStorage.setItem(STORAGE_KEY, raw); } catch (e) { memoryStore = raw; }
+  }
+
+  var state = loadState();
+  var selectedDay = (new Date().getDay() + 6) % 7;
+  var libLevel = 0;
+  var coach = { goal: 2, level: 0, days: 4, equip: 0, generated: null };
+
+  function currentWeek() { return state.program ? state.program.days : DEFAULT_WEEK; }
+  function workoutCount() { return currentWeek().filter(function (d) { return d.type === 'workout'; }).length; }
+  function isChecked(dayKey, exId) { return !!state.checked[dayKey + '-' + exId]; }
+  function dayDone(day) {
+    return day.type === 'workout' && day.exercises.every(function (ex) { return isChecked(day.key, ex.id); });
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ---------- WEEK VIEW ---------- */
+  function renderProgress() {
+    var total = workoutCount();
+    var done = currentWeek().filter(dayDone).length;
+    document.getElementById('progressLabel').textContent = done + '/' + total + ' SESSIONS THIS WEEK';
+    document.getElementById('progressFill').style.width = (total ? done / total * 100 : 0) + '%';
+  }
+
+  function renderTabs() {
+    var tabs = document.getElementById('tabs');
+    tabs.innerHTML = '';
+    currentWeek().forEach(function (day, i) {
+      var btn = document.createElement('button');
+      btn.className = 'tab';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', i === selectedDay ? 'true' : 'false');
+      var tick = dayDone(day) ? '<span class="tick">✓</span>' : '<span class="dot ' + (day.type === 'workout' ? 'work' : 'rest') + '"></span>';
+      btn.innerHTML = day.label + tick;
+      btn.addEventListener('click', function () { selectedDay = i; renderWeek(); });
+      tabs.appendChild(btn);
+    });
+  }
+
+  function renderDay() {
+    var day = currentWeek()[selectedDay];
+    var card = document.getElementById('dayCard');
+    if (day.type === 'rest') {
+      card.innerHTML = '<div class="card rest-card"><div class="rest-label mono">OFF DAY</div>' +
+        '<div class="rest-title display">Rest &amp; Recover</div>' +
+        '<div class="rest-copy">Light walk optional. This is when your body actually adapts — sleep counts as training today.</div></div>';
+      return;
+    }
+    var html = '<div class="card"><div class="card-head"><div>' +
+      '<div class="session-label mono">' + esc(day.session) + '</div>' +
+      '<div class="session-title display">' + esc(day.title) + '</div></div>';
+    if (dayDone(day)) html += '<div class="stamp">COMPLETE ✓</div>';
+    html += '</div><div class="ex-list">';
+    day.exercises.forEach(function (ex) {
+      var done = isChecked(day.key, ex.id);
+      html += '<button class="ex-row" aria-pressed="' + done + '" data-ex="' + esc(ex.id) + '">' +
+        '<span class="ex-check">' + (done ? '✓' : '') + '</span>' +
+        '<span class="ex-name">' + esc(ex.name) + '</span>' +
+        '<span class="ex-detail">' + esc(ex.sets) + '×' + esc(ex.reps) + '<small>' + esc(ex.rest) + ' rest</small></span></button>';
+    });
+    html += '</div>';
+    if (day.cardio) html += '<div class="cardio"><span class="flame">🔥</span>+ ' + esc(day.cardio) + '</div>';
+    html += '</div>';
+    card.innerHTML = html;
+    card.querySelectorAll('.ex-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var k = day.key + '-' + row.getAttribute('data-ex');
+        state.checked[k] = !state.checked[k];
+        saveState();
+        renderWeek();
+      });
+    });
+  }
+
+  function renderWeek() {
+    renderTabs();
+    renderDay();
+    renderProgress();
+    document.getElementById('programName').textContent = state.program ? 'PROGRAM: ' + state.program.name.toUpperCase() : '';
+    document.getElementById('restoreBtn').style.display = state.program ? 'block' : 'none';
+  }
+
+  /* ---------- LIBRARY VIEW ---------- */
+  function renderLibrary() {
+    var chips = document.getElementById('levelChips');
+    chips.innerHTML = '';
+    LEVELS.forEach(function (lvl, i) {
+      var b = document.createElement('button');
+      b.className = 'chip';
+      b.textContent = lvl;
+      b.setAttribute('aria-pressed', i === libLevel ? 'true' : 'false');
+      b.addEventListener('click', function () { libLevel = i; renderLibrary(); });
+      chips.appendChild(b);
+    });
+    var list = document.getElementById('libraryList');
+    var html = '';
+    LIBRARY.forEach(function (group) {
+      var rows = group.items.filter(function (it) { return it[libLevel + 1]; });
+      if (!rows.length) return;
+      html += '<div class="card"><div class="region-title display">' + esc(group.region) + '</div>';
+      rows.forEach(function (it) {
+        html += '<div class="lib-row"><span class="lib-name">' + esc(it[0]) + '</span><span class="lib-sets">' + esc(it[libLevel + 1]) + '</span></div>';
+      });
+      html += '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  /* ---------- AI COACH VIEW ---------- */
+  function chipGroup(elId, options, getIdx, setIdx) {
+    var el = document.getElementById(elId);
+    el.innerHTML = '';
+    options.forEach(function (opt, i) {
+      var b = document.createElement('button');
+      b.className = 'chip';
+      b.textContent = opt;
+      b.setAttribute('aria-pressed', i === getIdx() ? 'true' : 'false');
+      b.addEventListener('click', function () { setIdx(i); renderCoachChips(); });
+      el.appendChild(b);
+    });
+  }
+
+  function renderCoachChips() {
+    chipGroup('goalChips', GOALS, function () { return coach.goal; }, function (i) { coach.goal = i; });
+    chipGroup('coachLevelChips', LEVELS, function () { return coach.level; }, function (i) { coach.level = i; });
+    chipGroup('dayChips', DAY_OPTIONS.map(String), function () { return DAY_OPTIONS.indexOf(coach.days); }, function (i) { coach.days = DAY_OPTIONS[i]; });
+    chipGroup('equipChips', EQUIPMENT, function () { return coach.equip; }, function (i) { coach.equip = i; });
+  }
+
+  function setStatus(html, isError) {
+    document.getElementById('coachStatus').innerHTML = html ? '<div class="coach-status' + (isError ? ' error' : '') + '">' + html + '</div>' : '';
+  }
+
+  function callClaude(prompt) {
+    var body = JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    });
+    var attempt = function (headers) {
+      return fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: headers, body: body })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+    };
+    // Keyless first (works inside Claude); fall back to stored API key
+    return attempt({ 'Content-Type': 'application/json' }).catch(function () {
+      var key = (document.getElementById('apiKeyInput').value || state.apiKey || '').trim();
+      if (!key) throw new Error('NEED_KEY');
+      state.apiKey = key;
+      saveState();
+      return attempt({
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      });
+    });
+  }
+
+  function generate() {
+    var btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    document.getElementById('coachResult').innerHTML = '';
+    setStatus('<span class="spin"></span> Building your routine…');
+
+    var notes = document.getElementById('coachNotes').value.trim();
+    var prompt = 'You are a certified strength coach. Create a ' + coach.days + '-day/week gym routine. ' +
+      'Level: ' + LEVELS[coach.level] + '. Goal: ' + GOALS[coach.goal] + '. Equipment: ' + EQUIPMENT[coach.equip] + '. ' +
+      (notes ? 'Client notes: ' + notes + '. ' : '') +
+      'Respond with ONLY minified JSON, no markdown fences, no preamble, exactly this shape: ' +
+      '{"name":"short routine name","days":[{"title":"day title","exercises":[{"name":"exercise","sets":3,"reps":"8-10","rest":"90s"}],"cardio":"15 min easy pace or null"}]} ' +
+      'Rules: exactly ' + coach.days + ' day objects, 4-6 exercises per day, volume appropriate for the level, keep it compact.';
+
+    callClaude(prompt).then(function (data) {
+      var text = (data.content || []).filter(function (b) { return b.type === 'text'; })
+        .map(function (b) { return b.text; }).join('\n');
+      var clean = text.replace(/```json|```/g, '').trim();
+      var parsed = JSON.parse(clean);
+      if (!parsed.days || !parsed.days.length) throw new Error('BAD_SHAPE');
+      coach.generated = parsed;
+      setStatus('');
+      renderGenerated(parsed);
+    }).catch(function (err) {
+      if (err.message === 'NEED_KEY') {
+        setStatus('To use the AI coach outside Claude, add an Anthropic API key below (one-time, saved on this device).', true);
+      } else if (err instanceof SyntaxError) {
+        setStatus('The response got cut off — try fewer days or simpler notes.', true);
+      } else {
+        setStatus('Couldn\'t generate right now (' + esc(err.message) + '). Check your connection or key and try again.', true);
+      }
+    }).finally(function () { btn.disabled = false; });
+  }
+
+  function renderGenerated(p) {
+    var html = '<div class="card"><div class="gen-meta">GENERATED ROUTINE</div>' +
+      '<div class="session-title display">' + esc(p.name || 'Custom Routine') + '</div></div>';
+    p.days.forEach(function (d, i) {
+      html += '<div class="card"><div class="gen-meta">DAY ' + (i + 1) + '</div>' +
+        '<div class="gen-day-title display">' + esc(d.title || 'Session') + '</div><div class="ex-list">';
+      (d.exercises || []).forEach(function (ex) {
+        html += '<div class="lib-row"><span class="lib-name">' + esc(ex.name) + '</span>' +
+          '<span class="lib-sets">' + esc(ex.sets) + '×' + esc(ex.reps) + (ex.rest ? ' · ' + esc(ex.rest) : '') + '</span></div>';
+      });
+      html += '</div>';
+      if (d.cardio && d.cardio !== 'null') html += '<div class="cardio"><span class="flame">🔥</span>+ ' + esc(d.cardio) + '</div>';
+      html += '</div>';
+    });
+    html += '<button class="btn-apply" id="applyBtn">USE AS MY WEEK →</button>';
+    document.getElementById('coachResult').innerHTML = html;
+    document.getElementById('applyBtn').addEventListener('click', applyGenerated);
+  }
+
+  function applyGenerated() {
+    var p = coach.generated;
+    if (!p) return;
+    var n = Math.min(Math.max(p.days.length, 2), 6);
+    var slots = DAY_SLOTS[n] || DAY_SLOTS[4];
+    var days = WEEK_META.map(function (meta) { return { key: meta[0], label: meta[1], type: 'rest' }; });
+    p.days.slice(0, n).forEach(function (d, i) {
+      var idx = slots[i];
+      days[idx] = {
+        key: WEEK_META[idx][0], label: WEEK_META[idx][1], type: 'workout',
+        session: 'SESSION ' + (i + 1 < 10 ? '0' : '') + (i + 1),
+        title: String(d.title || 'Session ' + (i + 1)),
+        cardio: d.cardio && d.cardio !== 'null' ? String(d.cardio) : null,
+        exercises: (d.exercises || []).map(function (ex, j) {
+          return { id: 'g' + i + 'e' + j, name: String(ex.name || 'Exercise'), sets: ex.sets || 3, reps: String(ex.reps || '10-12'), rest: String(ex.rest || '60-90s') };
+        })
+      };
+    });
+    state.program = { name: String(p.name || 'Custom Routine'), days: days };
+    state.checked = {};
+    saveState();
+    switchView('week');
+    selectedDay = (new Date().getDay() + 6) % 7;
+    renderWeek();
+  }
+
+  /* ---------- NAV & GLOBAL ---------- */
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + name); });
+    document.querySelectorAll('.nav-btn').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-view') === name ? 'true' : 'false'); });
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(function (b) {
+    b.addEventListener('click', function () { switchView(b.getAttribute('data-view')); });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    if (window.confirm('Clear all check-offs for this week?')) {
+      state.checked = {};
+      state.week = mondayOf(new Date());
+      saveState();
+      renderWeek();
+    }
+  });
+
+  document.getElementById('restoreBtn').addEventListener('click', function () {
+    if (window.confirm('Go back to the default GYM 101 program? Your current check-offs will be cleared.')) {
+      state.program = null;
+      state.checked = {};
+      saveState();
+      renderWeek();
+    }
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', generate);
+  if (state.apiKey) document.getElementById('apiKeyInput').value = state.apiKey;
+
+  renderWeek();
+  renderLibrary();
+  renderCoachChips();
+
+  if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+    try { navigator.serviceWorker.register('sw.js'); } catch (e) { /* offline support unavailable */ }
+  }
+})();
+</script>
+</body>
+</html>

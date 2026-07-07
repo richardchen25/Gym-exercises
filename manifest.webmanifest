@@ -1,0 +1,11 @@
+{
+  "name": "GYM 101 — Strength & Conditioning",
+  "short_name": "GYM 101",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#12203A",
+  "theme_color": "#12203A",
+  "icons": [
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
